@@ -1,10 +1,16 @@
+import { Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
+import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import BoardPage from './pages/BoardPage'
+import DashboardPage from './pages/DashboardPage'
+import ReportsPage from './pages/ReportsPage'
+import DocsPage from './pages/DocsPage'
 import './index.css'
 
 function AppInner() {
   const { session } = useAuth()
+
   if (session === undefined) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8F7F4' }}>
@@ -12,7 +18,19 @@ function AppInner() {
       </div>
     )
   }
-  return session ? <BoardPage /> : <LoginPage />
+
+  if (!session) return <LoginPage />
+
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<BoardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/docs" element={<DocsPage />} />
+      </Routes>
+    </Layout>
+  )
 }
 
 export default function App() {

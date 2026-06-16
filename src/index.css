@@ -19,6 +19,32 @@
 body { font-family: var(--font); background: var(--bg); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
+/* ── Shell layout ── */
+.app-shell { display: flex; min-height: 100vh; }
+.shell-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ── Sidebar ── */
+.sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar-brand { padding: 14px 16px 10px; font-size: 15px; font-weight: 500; letter-spacing: -0.3px; color: var(--text-primary); border-bottom: 0.5px solid var(--border); margin-bottom: 6px; }
+.sidebar-brand span { color: var(--accent); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 1px; padding: 0 8px; flex: 1; }
+.sidebar-link { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: var(--radius); font-size: 12.5px; color: var(--text-secondary); cursor: pointer; text-decoration: none; background: transparent; border: none; font-family: var(--font); width: 100%; transition: background 0.1s, color 0.1s; }
+.sidebar-link:hover { background: var(--surface-2); color: var(--text-primary); }
+.sidebar-link-active { background: #EEEEFF; color: var(--accent); font-weight: 500; }
+.sidebar-link-active:hover { background: #E5E4FF; }
+.sidebar-link-danger:hover { background: #FCEBEB; color: #A32D2D; }
+.sidebar-bottom { display: flex; flex-direction: column; gap: 1px; padding: 8px; border-top: 0.5px solid var(--border); margin-top: auto; }
+.sidebar-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; margin: 6px 10px 4px; }
+
+/* ── Topbar (inside shell) ── */
+.topbar-page-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+/* ── Placeholder pages ── */
+.placeholder-page { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 10px; padding: 60px 20px; color: var(--text-muted); min-height: 60vh; }
+.placeholder-page h2 { font-size: 16px; font-weight: 500; color: var(--text-secondary); }
+.placeholder-page p { font-size: 13px; }
+.placeholder-icon { opacity: 0.3; }
+
 .topbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--surface); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 10; }
 .brand { font-size: 15px; font-weight: 500; letter-spacing: -0.3px; }
 .brand span { color: var(--accent); }

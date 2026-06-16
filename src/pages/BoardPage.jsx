@@ -2,29 +2,21 @@ import { useState, useMemo } from 'react'
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners,
 } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
-import { Settings, Sparkles, Plus, LogOut } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-import { useAuth } from '../hooks/useAuth'
+import { Plus } from 'lucide-react'
 import { useTasks } from '../hooks/useTasks'
 import { useConfig } from '../hooks/useConfig'
 import Column from '../components/board/Column'
 import TaskCard from '../components/board/TaskCard'
 import TaskModal from '../components/board/TaskModal'
 import AddTaskModal from '../components/board/AddTaskModal'
-import SettingsModal from '../components/board/SettingsModal'
-import AISuggestPanel from '../components/board/AISuggestPanel'
 
 export default function BoardPage() {
-  const { user } = useAuth()
   const { tasks, loading, addTask, updateTask, deleteTask } = useTasks()
-  const { config, saveConfig } = useConfig()
+  const { config } = useConfig()
 
   const [activeTask, setActiveTask] = useState(null)
   const [editingTask, setEditingTask] = useState(null)
   const [addingToCol, setAddingToCol] = useState(null)
-  const [showSettings, setShowSettings] = useState(false)
-  const [showAI, setShowAI] = useState(false)
   const [tagFilter, setTagFilter] = useState('all')
   const [assFilter, setAssFilter] = useState('all')
 
@@ -60,26 +52,12 @@ export default function BoardPage() {
   const accentStyle = { '--accent': config.accent }
 
   return (
-    <div className="app" style={accentStyle}>
+    <div style={accentStyle}>
       <header className="topbar">
-        <span className="brand">
-          {config.boardName.includes('board')
-            ? <>{config.boardName.replace('board', '')}<span>board</span></>
-            : config.boardName}
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 6 }}>{user?.email}</span>
+        <span className="topbar-page-title">Board</span>
         <div className="topbar-actions">
-          <button className="btn btn-ghost" onClick={() => setShowAI(v => !v)}>
-            <Sparkles size={12} /> AI suggest
-          </button>
-          <button className="btn btn-ghost" onClick={() => setShowSettings(true)}>
-            <Settings size={12} /> Settings
-          </button>
           <button className="btn btn-primary" onClick={() => setAddingToCol(config.columns[0]?.id)}>
             <Plus size={12} /> New task
-          </button>
-          <button className="icon-btn" onClick={() => supabase.auth.signOut()} aria-label="Sign out" title="Sign out">
-            <LogOut size={14} />
           </button>
         </div>
       </header>
@@ -97,10 +75,6 @@ export default function BoardPage() {
           <button key={a.id} className={`fp${assFilter === a.id ? ' fp-on' : ''}`} style={assFilter === a.id ? { background: config.accent, borderColor: config.accent, color: '#fff' } : {}} onClick={() => setAssFilter(a.id)}>{a.initials}</button>
         ))}
       </div>
-
-      {showAI && (
-        <AISuggestPanel tasks={tasks} config={config} onAdd={addTask} onDismiss={() => setShowAI(false)} />
-      )}
 
       {loading ? (
         <div className="board-loading">Loading tasks…</div>
@@ -148,10 +122,6 @@ export default function BoardPage() {
           onAdd={addTask}
           onClose={() => setAddingToCol(null)}
         />
-      )}
-
-      {showSettings && (
-        <SettingsModal config={config} onSave={saveConfig} onClose={() => setShowSettings(false)} />
       )}
     </div>
   )
