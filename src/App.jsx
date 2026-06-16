@@ -5,6 +5,7 @@ import { ConfigProvider } from './hooks/useConfig'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import BoardPage from './pages/BoardPage'
+import JournalPage from './pages/JournalPage'
 import DashboardPage from './pages/DashboardPage'
 import ReportsPage from './pages/ReportsPage'
 import DocsPage from './pages/DocsPage'
@@ -29,6 +30,7 @@ function AppInner() {
     <Layout>
       <Routes>
         <Route path="/" element={<BoardPage />} />
+        <Route path="/journal" element={<JournalPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/docs" element={<DocsPage />} />

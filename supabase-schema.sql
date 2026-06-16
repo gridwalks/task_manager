@@ -102,3 +102,59 @@ create policy "Users update own config"
 -- ============================================================
 create index if not exists tasks_user_status on public.tasks(user_id, status);
 create index if not exists tasks_user_position on public.tasks(user_id, position);
+
+
+-- ============================================================
+-- Journal entries (added in v2)
+-- ============================================================
+
+create table if not exists public.journal_entries (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references auth.users(id) on delete cascade,
+  entry_date      date not null default current_date,
+  title           text,
+  body            text default '',
+  entry_type      text default 'reflection'
+                  check (entry_type in ('reflection','decision','meeting','idea','win')),
+  mood            smallint check (mood between 1 and 5),
+  tags            text[] default '{}',
+  linked_task_id  uuid references public.tasks(id) on delete set null,
+  is_private      boolean default false,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+create trigger journal_updated_at
+  before update on public.journal_entries
+  for each row execute function update_updated_at();
+
+-- RLS
+alter table public.journal_entries enable row level security;
+
+create policy "Users read own journal entries"
+  on public.journal_entries for select
+  using (auth.uid() = user_id);
+
+create policy "Users insert own journal entries"
+  on public.journal_entries for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users update own journal entries"
+  on public.journal_entries for update
+  using (auth.uid() = user_id);
+
+create policy "Users delete own journal entries"
+  on public.journal_entries for delete
+  using (auth.uid() = user_id);
+
+-- Indexes
+create index if not exists journal_user_date
+  on public.journal_entries(user_id, entry_date desc);
+
+create index if not exists journal_user_type
+  on public.journal_entries(user_id, entry_type);
+
+-- Full-text search index
+create index if not exists journal_fts
+  on public.journal_entries
+  using gin(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(body,'')));
