@@ -158,3 +158,79 @@ create index if not exists journal_user_type
 create index if not exists journal_fts
   on public.journal_entries
   using gin(to_tsvector('english', coalesce(title,'') || ' ' || coalesce(body,'')));
+
+-- ============================================================
+-- User profiles & admin access control (added in v3)
+-- Run in Supabase Dashboard → SQL Editor
+-- ============================================================
+
+create table if not exists public.user_profiles (
+  id           uuid primary key references auth.users(id) on delete cascade,
+  email        text,
+  full_name    text,
+  role         text not null default 'user' check (role in ('user', 'admin')),
+  status       text not null default 'pending' check (status in ('pending', 'active', 'suspended')),
+  created_at   timestamptz default now(),
+  approved_at  timestamptz,
+  approved_by  uuid references auth.users(id)
+);
+
+-- Auto-create a profile row whenever a new auth user signs up
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.user_profiles (id, email)
+  values (new.id, new.email)
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- Security-definer helper — bypasses RLS so policies can call it without recursion
+create or replace function public.is_admin(uid uuid)
+returns boolean
+language sql
+security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.user_profiles
+    where id = uid and role = 'admin'
+  );
+$$;
+
+-- RLS
+alter table public.user_profiles enable row level security;
+
+create policy "Users read own profile"
+  on public.user_profiles for select
+  using (auth.uid() = id);
+
+create policy "Admins read all profiles"
+  on public.user_profiles for select
+  using (public.is_admin(auth.uid()));
+
+create policy "Admins update profiles"
+  on public.user_profiles for update
+  using (public.is_admin(auth.uid()));
+
+-- Users can update their own display name
+create policy "Users update own profile"
+  on public.user_profiles for update
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+create index if not exists user_profiles_status on public.user_profiles(status);
+create index if not exists user_profiles_role   on public.user_profiles(role);
+
+-- ⚠️  Bootstrap: after running this SQL, promote yourself to admin:
+--   update public.user_profiles
+--   set role = 'admin', status = 'active'
+--   where email = 'your@email.com';

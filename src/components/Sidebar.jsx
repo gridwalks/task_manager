@@ -1,18 +1,20 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Kanban, BarChart2, FileText, BookOpen, Settings, LogOut, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Kanban, BarChart2, FileText, BookOpen, ShieldCheck, Settings, LogOut, Sparkles } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../hooks/useProfile'
 
 const NAV = [
-  { to: '/',          icon: Kanban,           label: 'Board' },
-  { to: '/journal',   icon: BookOpen,         label: 'Journal' },
-  { to: '/dashboard', icon: LayoutDashboard,  label: 'Dashboard' },
-  { to: '/reports',   icon: BarChart2,        label: 'Reports' },
-  { to: '/docs',      icon: FileText,         label: 'Docs' },
+  { to: '/',          icon: Kanban,          label: 'Board' },
+  { to: '/journal',   icon: BookOpen,        label: 'Journal' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/reports',   icon: BarChart2,       label: 'Reports' },
+  { to: '/docs',      icon: FileText,        label: 'Docs' },
 ]
 
-export default function Sidebar({ onAI, onSettings }) {
+export default function Sidebar({ onAI, onSettings, pendingCount = 0 }) {
   const { user } = useAuth()
+  const { isAdmin } = useProfile()
   const navigate = useNavigate()
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? '??'
@@ -35,6 +37,22 @@ export default function Sidebar({ onAI, onSettings }) {
             <span>{label}</span>
           </NavLink>
         ))}
+
+        {isAdmin && (
+          <>
+            <div className="sidebar-section-divider" />
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => `sidebar-link${isActive ? ' sidebar-link-active' : ''}`}
+            >
+              <ShieldCheck size={16} />
+              <span>Admin</span>
+              {pendingCount > 0 && (
+                <span className="sidebar-badge">{pendingCount}</span>
+              )}
+            </NavLink>
+          </>
+        )}
       </nav>
 
       <div className="sidebar-bottom">

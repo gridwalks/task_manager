@@ -35,6 +35,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text-primar
 .sidebar-link-danger:hover { background: #FCEBEB; color: #A32D2D; }
 .sidebar-bottom { display: flex; flex-direction: column; gap: 1px; padding: 8px; border-top: 0.5px solid var(--border); margin-top: auto; }
 .sidebar-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; margin: 6px 10px 4px; }
+.sidebar-section-divider { height: 0.5px; background: var(--border); margin: 6px 10px; }
+.sidebar-badge { margin-left: auto; min-width: 18px; height: 18px; border-radius: 9px; background: #C17A2B; color: #fff; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
 
 /* ── Topbar (inside shell) ── */
 .topbar-page-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
