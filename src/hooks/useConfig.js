@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
@@ -26,7 +26,9 @@ const DEFAULT_CONFIG = {
   ],
 }
 
-export function useConfig() {
+const ConfigContext = createContext(null)
+
+export function ConfigProvider({ children }) {
   const { user } = useAuth()
   const [config, setConfigState] = useState(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
@@ -50,5 +52,13 @@ export function useConfig() {
     await supabase.from('board_config').upsert({ user_id: user.id, config: next }, { onConflict: 'user_id' })
   }, [config, user])
 
-  return { config, saveConfig, loading }
+  return (
+    <ConfigContext.Provider value={{ config, saveConfig, loading }}>
+      {children}
+    </ConfigContext.Provider>
+  )
+}
+
+export function useConfig() {
+  return useContext(ConfigContext)
 }

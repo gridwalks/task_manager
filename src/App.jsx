@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
+import { TasksProvider } from './hooks/useTasks'
+import { ConfigProvider } from './hooks/useConfig'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import BoardPage from './pages/BoardPage'
@@ -22,6 +24,8 @@ function AppInner() {
   if (!session) return <LoginPage />
 
   return (
+    <ConfigProvider>
+    <TasksProvider>
     <Layout>
       <Routes>
         <Route path="/" element={<BoardPage />} />
@@ -30,6 +34,8 @@ function AppInner() {
         <Route path="/docs" element={<DocsPage />} />
       </Routes>
     </Layout>
+    </TasksProvider>
+    </ConfigProvider>
   )
 }
 

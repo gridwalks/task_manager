@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
-export function useTasks() {
+const TasksContext = createContext(null)
+
+export function TasksProvider({ children }) {
   const { user } = useAuth()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -71,5 +73,13 @@ export function useTasks() {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus, position: newPosition } : t))
   }, [updateTask])
 
-  return { tasks, loading, error, addTask, updateTask, deleteTask, moveTask, refetch: fetch }
+  return (
+    <TasksContext.Provider value={{ tasks, loading, error, addTask, updateTask, deleteTask, moveTask, refetch: fetch }}>
+      {children}
+    </TasksContext.Provider>
+  )
+}
+
+export function useTasks() {
+  return useContext(TasksContext)
 }
