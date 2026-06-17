@@ -25,6 +25,7 @@ export default function ExpenseForm({ expense, categories, onSave, onDelete, onC
   })
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
+  const [saveError, setSaveError] = useState(null)
 
   const cats = categories?.length ? categories : DEFAULT_EXPENSE_CATEGORIES
 
@@ -45,9 +46,12 @@ export default function ExpenseForm({ expense, categories, onSave, onDelete, onC
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
     setSaving(true)
+    setSaveError(null)
     try {
       await onSave({ ...form, amount: Number(form.amount) })
       onClose()
+    } catch (err) {
+      setSaveError(err.message || 'Save failed. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -186,6 +190,13 @@ export default function ExpenseForm({ expense, categories, onSave, onDelete, onC
             </div>
           </div>
         </div>
+
+        {/* Save error */}
+        {saveError && (
+          <div style={{ margin: '0 16px 8px', padding: '8px 12px', borderRadius: 'var(--radius)', background: '#FEE2E2', color: '#A32D2D', fontSize: 12 }}>
+            {saveError}
+          </div>
+        )}
 
         {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '0.5px solid var(--border)' }}>
