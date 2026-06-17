@@ -234,3 +234,46 @@ create index if not exists user_profiles_role   on public.user_profiles(role);
 --   update public.user_profiles
 --   set role = 'admin', status = 'active'
 --   where email = 'your@email.com';
+
+-- ============================================================
+-- Expenses (added in v4)
+-- ============================================================
+
+create table if not exists public.expenses (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  date        date not null default current_date,
+  vendor      text not null,
+  amount      numeric(10,2) not null check (amount >= 0),
+  currency    text not null default 'USD',
+  category    text,
+  description text,
+  notes       text default '',
+  status      text not null default 'draft'
+              check (status in ('draft','submitted','approved','rejected')),
+  receipt_url text,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+
+create trigger expenses_updated_at
+  before update on public.expenses
+  for each row execute function update_updated_at();
+
+alter table public.expenses enable row level security;
+
+create policy "Users read own expenses"
+  on public.expenses for select using (auth.uid() = user_id);
+
+create policy "Users insert own expenses"
+  on public.expenses for insert with check (auth.uid() = user_id);
+
+create policy "Users update own expenses"
+  on public.expenses for update using (auth.uid() = user_id);
+
+create policy "Users delete own expenses"
+  on public.expenses for delete using (auth.uid() = user_id);
+
+create index if not exists expenses_user_date     on public.expenses(user_id, date desc);
+create index if not exists expenses_user_status   on public.expenses(user_id, status);
+create index if not exists expenses_user_category on public.expenses(user_id, category);
