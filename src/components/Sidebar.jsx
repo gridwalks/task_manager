@@ -5,10 +5,10 @@ import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 
 const NAV = [
-  { to: '/',          icon: Kanban,          label: 'Board' },
+  { to: '/',          icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/board',     icon: Kanban,          label: 'Board' },
   { to: '/journal',   icon: BookOpen,        label: 'Journal' },
   { to: '/expenses',  icon: Receipt,         label: 'Expenses' },
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/reports',   icon: BarChart2,       label: 'Reports' },
   { to: '/docs',      icon: FileText,        label: 'Docs' },
 ]
@@ -33,6 +33,7 @@ export default function Sidebar({ onAI, onSettings, pendingCount = 0 }) {
             to={to}
             end={to === '/'}
             className={({ isActive }) => `sidebar-link${isActive ? ' sidebar-link-active' : ''}`}
+            end
           >
             <Icon size={16} />
             <span>{label}</span>

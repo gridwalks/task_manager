@@ -40,7 +40,8 @@ function AppInner() {
     <TasksProvider>
     <Layout>
       <Routes>
-        <Route path="/"          element={<BoardPage />} />
+        <Route path="/"          element={<DashboardPage />} />
+        <Route path="/board"     element={<BoardPage />} />
         <Route path="/journal"   element={<JournalPage />} />
         <Route path="/expenses"  element={<ExpensesPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
