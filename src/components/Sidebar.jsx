@@ -23,7 +23,7 @@ export default function Sidebar({ onAI, onSettings, pendingCount = 0 }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        task<span>board</span>
+        <img src="/logo.png" alt="AcceleraQA" style={{ width: '100%', maxWidth: 148, height: 'auto', display: 'block' }} />
       </div>
 
       <nav className="sidebar-nav">
