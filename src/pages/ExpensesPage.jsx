@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Search, Receipt, TrendingUp, Clock, CheckCircle } from 'lucide-react'
+import { Plus, Search, Receipt, TrendingUp, Clock, CheckCircle, Paperclip } from 'lucide-react'
 import { useExpenses } from '../hooks/useExpenses'
 import { useConfig } from '../hooks/useConfig'
 import ExpenseForm from '../components/expenses/ExpenseForm'
@@ -225,7 +225,12 @@ export default function ExpensesPage() {
 
             <StatusBadge status={expense.status} />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+              {expense.attachments?.length > 0 && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--text-muted)' }}>
+                  <Paperclip size={11} /> {expense.attachments.length}
+                </span>
+              )}
               <button onClick={() => openEdit(expense)} className="btn btn-sm btn-ghost">Edit</button>
             </div>
           </div>

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { X, Trash2 } from 'lucide-react'
 import { DEFAULT_EXPENSE_CATEGORIES, CURRENCIES, STATUS_META } from '../../lib/expenseUtils'
+import AttachmentZone from './AttachmentZone'
 
 const todayISO = () => new Date().toISOString().split('T')[0]
 
 const EMPTY = {
   date: todayISO(), vendor: '', amount: '', currency: 'USD',
-  category: '', description: '', notes: '', status: 'draft',
+  category: '', description: '', notes: '', status: 'draft', attachments: [],
 }
 
 export default function ExpenseForm({ expense, categories, onSave, onDelete, onClose }) {
@@ -20,6 +21,7 @@ export default function ExpenseForm({ expense, categories, onSave, onDelete, onC
     description: expense.description || '',
     notes: expense.notes || '',
     status: expense.status || 'draft',
+    attachments: expense.attachments || [],
   })
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
@@ -151,6 +153,15 @@ export default function ExpenseForm({ expense, categories, onSave, onDelete, onC
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="Additional notes…"
               className="notes-area" style={{ minHeight: 56 }} />
+          </div>
+
+          {/* Attachments */}
+          <div>
+            <label className="field-lbl">Attachments</label>
+            <AttachmentZone
+              attachments={form.attachments}
+              onChange={atts => set('attachments', atts)}
+            />
           </div>
 
           {/* Status */}

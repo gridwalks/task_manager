@@ -274,6 +274,47 @@ create policy "Users update own expenses"
 create policy "Users delete own expenses"
   on public.expenses for delete using (auth.uid() = user_id);
 
+-- Add attachments column (if upgrading an existing expenses table)
+alter table public.expenses add column if not exists attachments jsonb default '[]';
+
 create index if not exists expenses_user_date     on public.expenses(user_id, date desc);
 create index if not exists expenses_user_status   on public.expenses(user_id, status);
 create index if not exists expenses_user_category on public.expenses(user_id, category);
+
+-- ============================================================
+-- Supabase Storage — expense attachments bucket
+-- Run in Supabase Dashboard → SQL Editor
+-- ============================================================
+
+-- Create private bucket
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'expense-attachments',
+  'expense-attachments',
+  false,
+  10485760,  -- 10 MB per file
+  array['image/jpeg','image/png','image/webp','image/gif','application/pdf']
+)
+on conflict (id) do nothing;
+
+-- Users can upload into their own folder (path starts with their user_id)
+create policy "Users upload own expense attachments"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'expense-attachments'
+    and auth.uid()::text = (string_to_array(name, '/'))[1]
+  );
+
+create policy "Users read own expense attachments"
+  on storage.objects for select
+  using (
+    bucket_id = 'expense-attachments'
+    and auth.uid()::text = (string_to_array(name, '/'))[1]
+  );
+
+create policy "Users delete own expense attachments"
+  on storage.objects for delete
+  using (
+    bucket_id = 'expense-attachments'
+    and auth.uid()::text = (string_to_array(name, '/'))[1]
+  );
