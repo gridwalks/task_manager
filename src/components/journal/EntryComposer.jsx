@@ -3,6 +3,7 @@ import { Trash2, Lock, Unlock, Link2, X } from 'lucide-react'
 import MoodPicker from './MoodPicker'
 import TagPicker from './TagPicker'
 import JournalTagSettings from './JournalTagSettings'
+import RichEditor from './RichEditor'
 import { ENTRY_TYPES } from '../../hooks/useJournalConfig'
 import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journalUtils'
 
@@ -25,7 +26,6 @@ export default function EntryComposer({ entry, journalTags, tasks, onSave, onDel
   const [showTagSettings, setShowTagSettings] = useState(false)
   const [showTaskPicker, setShowTaskPicker] = useState(false)
   const autosaveTimer = useRef(null)
-  const bodyRef = useRef()
 
   useEffect(() => {
     if (entry) {
@@ -147,20 +147,13 @@ export default function EntryComposer({ entry, journalTags, tasks, onSave, onDel
       />
 
       {/* Body */}
-      <textarea
-        ref={bodyRef}
-        value={form.body}
-        onChange={e => update('body', e.target.value)}
-        placeholder="Write your thoughts…"
-        style={{
-          flex: 1, width: '100%', minHeight: 180,
-          border: 'none', outline: 'none', resize: 'none',
-          fontSize: 13, lineHeight: 1.7,
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          color: 'var(--text-primary)', background: 'transparent',
-          marginBottom: 12,
-        }}
-      />
+      <div style={{ flex: 1, minHeight: 0, marginBottom: 12, display: 'flex', flexDirection: 'column' }}>
+        <RichEditor
+          value={form.body}
+          onChange={v => update('body', v)}
+          placeholder="Write your thoughts…"
+        />
+      </div>
 
       {/* Tags */}
       <div style={{ marginBottom: 12 }}>

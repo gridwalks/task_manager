@@ -6,7 +6,7 @@ import { formatEntryDate, wordCountLabel } from '../../lib/journalUtils'
 export default function EntryCard({ entry, journalTags, isActive, onClick }) {
   const type = ENTRY_TYPES.find(t => t.id === entry.entry_type)
   const tags = (entry.tags || []).map(id => journalTags.find(t => t.id === id)).filter(Boolean)
-  const preview = (entry.body || '').replace(/\n/g, ' ').trim()
+  const preview = (entry.body || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 
   return (
     <div

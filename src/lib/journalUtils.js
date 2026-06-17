@@ -1,6 +1,11 @@
+function stripHtml(html) {
+  return html ? html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : ''
+}
+
 export function wordCount(text) {
-  if (!text || !text.trim()) return 0
-  return text.trim().split(/\s+/).length
+  const plain = stripHtml(text)
+  if (!plain) return 0
+  return plain.split(/\s+/).filter(Boolean).length
 }
 
 export function readTime(text) {
