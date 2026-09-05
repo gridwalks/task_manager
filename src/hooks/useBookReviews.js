@@ -4,9 +4,10 @@ import { useAuth } from './useAuth'
 import { todayISO } from '../lib/journalUtils'
 
 export const REVIEW_STATUSES = [
-  { id: 'draft',  label: 'Draft',  bg: '#FAEEDA', text: '#633806' },
-  { id: 'ready',  label: 'Ready',  bg: '#E6F1FB', text: '#0C447C' },
-  { id: 'posted', label: 'Posted', bg: '#EAF3DE', text: '#27500A' },
+  { id: 'draft',       label: 'Draft',       bg: '#FAEEDA', text: '#633806' },
+  { id: 'in_progress', label: 'In Progress', bg: '#FDE3D0', text: '#94430A' },
+  { id: 'ready',       label: 'Ready',       bg: '#E6F1FB', text: '#0C447C' },
+  { id: 'posted',      label: 'Posted',      bg: '#EAF3DE', text: '#27500A' },
 ]
 
 export function useBookReviews() {

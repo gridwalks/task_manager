@@ -16,13 +16,27 @@ const EMPTY_REVIEW = {
   cover_path: null,
 }
 
+const ACTIVE_ID_KEY = 'reviews:activeId'
+
+function readStoredActiveId() {
+  try { return sessionStorage.getItem(ACTIVE_ID_KEY) || null } catch { return null }
+}
+
+function writeStoredActiveId(id) {
+  try {
+    if (id) sessionStorage.setItem(ACTIVE_ID_KEY, id)
+    else sessionStorage.removeItem(ACTIVE_ID_KEY)
+  } catch { /* storage unavailable */ }
+}
+
 export default function ReviewsPage() {
   const { reviews, loading, addReview, updateReview, deleteReview, importReviews } = useBookReviews()
   const { tasks } = useTasks()
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [activeId, setActiveId] = useState(null)
+  const [activeId, setActiveIdState] = useState(readStoredActiveId)
+  const setActiveId = (id) => { setActiveIdState(id); writeStoredActiveId(id) }
   const [isNew, setIsNew] = useState(false)
   const [newDefaults, setNewDefaults] = useState(EMPTY_REVIEW)
   const [search, setSearch] = useState('')

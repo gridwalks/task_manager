@@ -335,7 +335,7 @@ create table if not exists public.book_reviews (
   notes           text default '',     -- accuracy flags, approvals, warnings
   rating          smallint check (rating between 1 and 5),
   status          text default 'draft'
-                  check (status in ('draft','ready','posted')),
+                  check (status in ('draft','in_progress','ready','posted')),
   linked_task_id  uuid references public.tasks(id) on delete set null,
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
