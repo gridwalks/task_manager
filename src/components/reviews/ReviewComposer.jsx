@@ -33,6 +33,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   })
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState(null)
+  const [saveError, setSaveError] = useState(null)
   const [copied, setCopied] = useState(false)
   const [showTaskPicker, setShowTaskPicker] = useState(false)
   const autosaveTimer = useRef(null)
@@ -61,6 +62,9 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     try {
       await onSave(data)
       setSavedAt(new Date())
+      setSaveError(null)
+    } catch (e) {
+      setSaveError(e.message || 'Save failed')
     } finally {
       setSaving(false)
     }
@@ -121,7 +125,12 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
             {formatEntryDateLong(form.review_date)}
           </div>
         </div>
-        {savedAt && !saving && (
+        {saveError && !saving && (
+          <span style={{ fontSize: 10, color: '#A32D2D', alignSelf: 'flex-end', maxWidth: 220, textAlign: 'right' }}>
+            {saveError}
+          </span>
+        )}
+        {savedAt && !saving && !saveError && (
           <span style={{ fontSize: 10, color: 'var(--text-muted)', alignSelf: 'flex-end' }}>
             Saved {savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
