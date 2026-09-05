@@ -1,4 +1,5 @@
 import { StarDots } from './StarRating'
+import { CoverThumb } from './CoverUpload'
 import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
 import { formatEntryDate, wordCountLabel } from '../../lib/journalUtils'
 
@@ -37,33 +38,38 @@ export default function ReviewCard({ review, isActive, onClick }) {
         )}
       </div>
 
-      {review.title && (
-        <div style={{
-          fontSize: 12, fontWeight: 500, color: 'var(--text-primary)',
-          marginBottom: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>
-          {review.title}
-        </div>
-      )}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+        <CoverThumb coverPath={review.cover_path} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {review.title && (
+            <div style={{
+              fontSize: 12, fontWeight: 500, color: 'var(--text-primary)',
+              marginBottom: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {review.title}
+            </div>
+          )}
 
-      {(review.author || review.series_position) && (
-        <div style={{
-          fontSize: 10, color: 'var(--text-secondary)', marginBottom: 2,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>
-          {[review.author, review.series_position].filter(Boolean).join(' · ')}
-        </div>
-      )}
+          {(review.author || review.series_position) && (
+            <div style={{
+              fontSize: 10, color: 'var(--text-secondary)', marginBottom: 2,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {[review.author, review.series_position].filter(Boolean).join(' · ')}
+            </div>
+          )}
 
-      {preview && (
-        <div style={{
-          fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4,
-          marginBottom: 5, overflow: 'hidden', display: '-webkit-box',
-          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-        }}>
-          {preview}
+          {preview && (
+            <div style={{
+              fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4,
+              marginBottom: 5, overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            }}>
+              {preview}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {review.script && (
         <div style={{ display: 'flex', alignItems: 'center' }}>

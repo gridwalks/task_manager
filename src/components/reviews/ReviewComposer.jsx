@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Trash2, Link2, X, Copy, Check } from 'lucide-react'
 import StarRating from './StarRating'
+import CoverUpload from './CoverUpload'
 import RichEditor from '../journal/RichEditor'
 import { TaskPickerModal } from '../journal/EntryComposer'
 import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
@@ -28,6 +29,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     status: review?.status || 'draft',
     rating: review?.rating || null,
     linked_task_id: review?.linked_task_id || null,
+    cover_path: review?.cover_path || null,
   })
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState(null)
@@ -47,6 +49,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         status: review.status || 'draft',
         rating: review.rating || null,
         linked_task_id: review.linked_task_id || null,
+        cover_path: review.cover_path || null,
       })
       setSavedAt(null)
     }
@@ -152,40 +155,44 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         </div>
       </div>
 
-      {/* Book title */}
-      <input
-        value={form.title}
-        onChange={e => update('title', e.target.value)}
-        placeholder="Book title…"
-        style={{
-          width: '100%', fontSize: 15, fontWeight: 500, border: 'none', outline: 'none',
-          color: 'var(--text-primary)', fontFamily: 'var(--font)', background: 'transparent',
-          marginBottom: 6, padding: 0,
-        }}
-      />
-
-      {/* Author + Series */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
-        <input
-          value={form.author}
-          onChange={e => update('author', e.target.value)}
-          placeholder="Author…"
-          style={{
-            flex: 1, fontSize: 12, border: 'none', outline: 'none',
-            color: 'var(--text-secondary)', fontFamily: 'var(--font)', background: 'transparent',
-            padding: 0,
-          }}
+      {/* Cover + book details */}
+      <div style={{ display: 'flex', gap: 14, marginBottom: 12, alignItems: 'flex-start' }}>
+        <CoverUpload
+          coverPath={form.cover_path}
+          onChange={p => update('cover_path', p)}
         />
-        <input
-          value={form.series_position}
-          onChange={e => update('series_position', e.target.value)}
-          placeholder="Series / position (e.g. The Hirathean Path #1)…"
-          style={{
-            flex: 1.4, fontSize: 12, border: 'none', outline: 'none',
-            color: 'var(--text-secondary)', fontFamily: 'var(--font)', background: 'transparent',
-            padding: 0,
-          }}
-        />
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 4 }}>
+          <input
+            value={form.title}
+            onChange={e => update('title', e.target.value)}
+            placeholder="Book title…"
+            style={{
+              width: '100%', fontSize: 15, fontWeight: 500, border: 'none', outline: 'none',
+              color: 'var(--text-primary)', fontFamily: 'var(--font)', background: 'transparent',
+              padding: 0,
+            }}
+          />
+          <input
+            value={form.author}
+            onChange={e => update('author', e.target.value)}
+            placeholder="Author…"
+            style={{
+              width: '100%', fontSize: 12, border: 'none', outline: 'none',
+              color: 'var(--text-secondary)', fontFamily: 'var(--font)', background: 'transparent',
+              padding: 0,
+            }}
+          />
+          <input
+            value={form.series_position}
+            onChange={e => update('series_position', e.target.value)}
+            placeholder="Series / position (e.g. The Hirathean Path #1)…"
+            style={{
+              width: '100%', fontSize: 12, border: 'none', outline: 'none',
+              color: 'var(--text-secondary)', fontFamily: 'var(--font)', background: 'transparent',
+              padding: 0,
+            }}
+          />
+        </div>
       </div>
 
       {/* Script */}

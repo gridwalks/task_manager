@@ -4,12 +4,14 @@ import { useBookReviews, REVIEW_STATUSES } from '../hooks/useBookReviews'
 import { useTasks } from '../hooks/useTasks'
 import ReviewCard from '../components/reviews/ReviewCard'
 import ReviewComposer from '../components/reviews/ReviewComposer'
+import { deleteCover } from '../lib/storage'
 import { todayISO, groupByMonth, formatMonthKey } from '../lib/journalUtils'
 
 const EMPTY_REVIEW = {
   title: '', author: '', series_position: '',
   script: '', notes: '', review_date: todayISO(),
   status: 'draft', rating: null, linked_task_id: null,
+  cover_path: null,
 }
 
 export default function ReviewsPage() {
@@ -54,7 +56,11 @@ export default function ReviewsPage() {
   }
 
   const handleDelete = async (id) => {
+    const target = reviews.find(r => r.id === id)
     await deleteReview(id)
+    if (target?.cover_path) {
+      try { await deleteCover(target.cover_path) } catch { /* file may already be gone */ }
+    }
     setActiveId(null)
     setIsNew(false)
   }
