@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Kanban, BarChart2, FileText, BookOpen, Clapperboard, Receipt, ShieldCheck, Settings, LogOut, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Kanban, BarChart2, FileText, BookOpen, Clapperboard, Library, Receipt, ShieldCheck, Settings, LogOut, Sparkles } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -9,6 +9,7 @@ const NAV = [
   { to: '/board',     icon: Kanban,          label: 'Board' },
   { to: '/journal',   icon: BookOpen,        label: 'Journal' },
   { to: '/reviews',   icon: Clapperboard,    label: 'Reviews' },
+  { to: '/library',   icon: Library,         label: 'Library' },
   { to: '/expenses',  icon: Receipt,         label: 'Expenses' },
   { to: '/reports',   icon: BarChart2,       label: 'Reports' },
   { to: '/docs',      icon: FileText,        label: 'Docs' },

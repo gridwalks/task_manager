@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Plus, Search, Star } from 'lucide-react'
 import { useBookReviews, REVIEW_STATUSES } from '../hooks/useBookReviews'
 import { useTasks } from '../hooks/useTasks'
@@ -17,12 +18,24 @@ const EMPTY_REVIEW = {
 export default function ReviewsPage() {
   const { reviews, loading, addReview, updateReview, deleteReview } = useBookReviews()
   const { tasks } = useTasks()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const [activeId, setActiveId] = useState(null)
   const [isNew, setIsNew] = useState(false)
+  const [newDefaults, setNewDefaults] = useState(EMPTY_REVIEW)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [ratingFilter, setRatingFilter] = useState('all')
+
+  useEffect(() => {
+    if (location.state?.prefill) {
+      setNewDefaults({ ...EMPTY_REVIEW, ...location.state.prefill })
+      setIsNew(true)
+      setActiveId(null)
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location.state, location.pathname, navigate])
 
   const filtered = useMemo(() => {
     return reviews.filter(r => {
@@ -42,7 +55,7 @@ export default function ReviewsPage() {
   const grouped = groupByMonth(filtered, 'review_date')
   const activeReview = isNew ? null : reviews.find(r => r.id === activeId)
 
-  const handleNew = () => { setIsNew(true); setActiveId(null) }
+  const handleNew = () => { setNewDefaults(EMPTY_REVIEW); setIsNew(true); setActiveId(null) }
   const handleSelect = (review) => { setActiveId(review.id); setIsNew(false) }
 
   const handleSave = async (form) => {
@@ -198,7 +211,7 @@ export default function ReviewsPage() {
         {(isNew || activeReview) ? (
           <ReviewComposer
             key={isNew ? 'new' : activeId}
-            review={isNew ? EMPTY_REVIEW : activeReview}
+            review={isNew ? newDefaults : activeReview}
             tasks={tasks}
             onSave={handleSave}
             onDelete={handleDelete}

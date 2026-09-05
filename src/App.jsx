@@ -10,6 +10,7 @@ import SuspendedPage from './pages/SuspendedPage'
 import BoardPage from './pages/BoardPage'
 import JournalPage from './pages/JournalPage'
 import ReviewsPage from './pages/ReviewsPage'
+import LibraryPage from './pages/LibraryPage'
 import ExpensesPage from './pages/ExpensesPage'
 import DashboardPage from './pages/DashboardPage'
 import ReportsPage from './pages/ReportsPage'
@@ -45,6 +46,7 @@ function AppInner() {
         <Route path="/board"     element={<BoardPage />} />
         <Route path="/journal"   element={<JournalPage />} />
         <Route path="/reviews"   element={<ReviewsPage />} />
+        <Route path="/library"   element={<LibraryPage />} />
         <Route path="/expenses"  element={<ExpensesPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/reports"   element={<ReportsPage />} />
