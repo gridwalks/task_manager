@@ -318,3 +318,61 @@ create policy "Users delete own expense attachments"
     bucket_id = 'expense-attachments'
     and auth.uid()::text = (string_to_array(name, '/'))[1]
   );
+
+
+-- ============================================================
+-- Book reviews — TikTok review scripts
+-- ============================================================
+
+create table if not exists public.book_reviews (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references auth.users(id) on delete cascade,
+  review_date     date not null default current_date,
+  title           text,                -- book title
+  author          text,
+  series_position text,                -- e.g. "The Hirathean Path #1"
+  script          text default '',     -- TikTok script body (rich text HTML)
+  notes           text default '',     -- accuracy flags, approvals, warnings
+  rating          smallint check (rating between 1 and 5),
+  status          text default 'draft'
+                  check (status in ('draft','ready','posted')),
+  linked_task_id  uuid references public.tasks(id) on delete set null,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+create trigger book_reviews_updated_at
+  before update on public.book_reviews
+  for each row execute function update_updated_at();
+
+-- RLS
+alter table public.book_reviews enable row level security;
+
+create policy "Users read own book reviews"
+  on public.book_reviews for select
+  using (auth.uid() = user_id);
+
+create policy "Users insert own book reviews"
+  on public.book_reviews for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users update own book reviews"
+  on public.book_reviews for update
+  using (auth.uid() = user_id);
+
+create policy "Users delete own book reviews"
+  on public.book_reviews for delete
+  using (auth.uid() = user_id);
+
+-- Indexes
+create index if not exists book_reviews_user_date
+  on public.book_reviews(user_id, review_date desc);
+
+create index if not exists book_reviews_user_status
+  on public.book_reviews(user_id, status);
+
+-- Full-text search index
+create index if not exists book_reviews_fts
+  on public.book_reviews
+  using gin(to_tsvector('english',
+    coalesce(title,'') || ' ' || coalesce(author,'') || ' ' || coalesce(script,'')));

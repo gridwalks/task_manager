@@ -37,14 +37,18 @@ export function todayISO() {
   return new Date().toISOString().split('T')[0]
 }
 
-export function groupEntriesByMonth(entries) {
+export function groupByMonth(items, dateField = 'entry_date') {
   const groups = {}
-  entries.forEach(e => {
-    const key = e.entry_date ? e.entry_date.slice(0, 7) : 'unknown'
+  items.forEach(e => {
+    const key = e[dateField] ? e[dateField].slice(0, 7) : 'unknown'
     if (!groups[key]) groups[key] = []
     groups[key].push(e)
   })
   return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]))
+}
+
+export function groupEntriesByMonth(entries) {
+  return groupByMonth(entries, 'entry_date')
 }
 
 export function formatMonthKey(key) {

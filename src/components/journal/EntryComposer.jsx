@@ -259,7 +259,7 @@ export default function EntryComposer({ entry, journalTags, tasks, onSave, onDel
   )
 }
 
-function TaskPickerModal({ tasks, onSelect, onClose }) {
+export function TaskPickerModal({ tasks, onSelect, onClose }) {
   const [q, setQ] = useState('')
   const filtered = tasks.filter(t =>
     !q || t.title.toLowerCase().includes(q.toLowerCase()) || (t.short_id || '').toLowerCase().includes(q.toLowerCase())
