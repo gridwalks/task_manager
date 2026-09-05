@@ -96,7 +96,7 @@ export function useBookReviews() {
     rows.forEach(r => {
       const id = existingMap.get(key(r.title, r.author))
       if (id) {
-        toUpdate.push({ id, script: r.script, notes: r.notes, series_position: r.series_position })
+        toUpdate.push({ id, user_id: user.id, script: r.script, notes: r.notes, series_position: r.series_position })
       } else {
         toInsert.push({
           ...r, user_id: user.id, review_date: todayISO(), status: 'draft', rating: null,
