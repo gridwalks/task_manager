@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { todayISO } from '../lib/journalUtils'
 
 export const REVIEW_STATUSES = [
   { id: 'draft',  label: 'Draft',  bg: '#FAEEDA', text: '#633806' },
@@ -75,5 +76,52 @@ export function useBookReviews() {
     setReviews(prev => prev.filter(r => r.id !== id))
   }, [user])
 
-  return { reviews, loading, error, addReview, updateReview, deleteReview, refetch: fetchReviews }
+  // Imports rows from a script CSV, matching against existing reviews by
+  // title+author so curated fields (status, rating, cover) are preserved
+  // on re-import — only script/notes/series_position get overwritten.
+  const importReviews = useCallback(async (rows, onProgress) => {
+    if (!user) return { inserted: 0, updated: 0 }
+
+    const { data: existing, error: fetchErr } = await supabase
+      .from('book_reviews')
+      .select('id, title, author')
+      .eq('user_id', user.id)
+    if (fetchErr) throw fetchErr
+
+    const key = (t, a) => `${(t || '').trim().toLowerCase()}|${(a || '').trim().toLowerCase()}`
+    const existingMap = new Map((existing || []).map(r => [key(r.title, r.author), r.id]))
+
+    const toInsert = []
+    const toUpdate = []
+    rows.forEach(r => {
+      const id = existingMap.get(key(r.title, r.author))
+      if (id) {
+        toUpdate.push({ id, script: r.script, notes: r.notes, series_position: r.series_position })
+      } else {
+        toInsert.push({
+          ...r, user_id: user.id, review_date: todayISO(), status: 'draft', rating: null,
+        })
+      }
+    })
+
+    let done = 0
+    const total = rows.length
+    if (toInsert.length) {
+      const { error } = await supabase.from('book_reviews').insert(toInsert)
+      if (error) throw error
+      done += toInsert.length
+      onProgress?.(done, total)
+    }
+    if (toUpdate.length) {
+      const { error } = await supabase.from('book_reviews').upsert(toUpdate, { onConflict: 'id' })
+      if (error) throw error
+      done += toUpdate.length
+      onProgress?.(done, total)
+    }
+
+    await fetchReviews()
+    return { inserted: toInsert.length, updated: toUpdate.length }
+  }, [user, fetchReviews])
+
+  return { reviews, loading, error, addReview, updateReview, deleteReview, importReviews, refetch: fetchReviews }
 }

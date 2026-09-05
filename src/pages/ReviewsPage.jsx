@@ -5,6 +5,7 @@ import { useBookReviews, REVIEW_STATUSES } from '../hooks/useBookReviews'
 import { useTasks } from '../hooks/useTasks'
 import ReviewCard from '../components/reviews/ReviewCard'
 import ReviewComposer from '../components/reviews/ReviewComposer'
+import ReviewImport from '../components/reviews/ReviewImport'
 import { deleteCover } from '../lib/storage'
 import { todayISO, groupByMonth, formatMonthKey } from '../lib/journalUtils'
 
@@ -16,7 +17,7 @@ const EMPTY_REVIEW = {
 }
 
 export default function ReviewsPage() {
-  const { reviews, loading, addReview, updateReview, deleteReview } = useBookReviews()
+  const { reviews, loading, addReview, updateReview, deleteReview, importReviews } = useBookReviews()
   const { tasks } = useTasks()
   const location = useLocation()
   const navigate = useNavigate()
@@ -176,6 +177,9 @@ export default function ReviewsPage() {
                 fontSize: 11, fontFamily: 'var(--font)', color: 'var(--text-primary)', marginLeft: 5,
               }}
             />
+          </div>
+          <div style={{ marginTop: 7 }}>
+            <ReviewImport onImport={importReviews} />
           </div>
         </div>
 
