@@ -16,6 +16,12 @@ const COVER_LOOKUP_DELAY = 1000
 
 const AUTOSAVE_DELAY = 1500
 
+const GENRES = [
+  'Romance', 'Dark Romance', 'Romantasy', 'Fantasy', 'Science Fiction',
+  'Young Adult', 'Mystery / Thriller', 'Horror', 'Contemporary Fiction',
+  'Historical Fiction', 'Nonfiction', 'Memoir / Biography', 'Self-Help', 'Other',
+]
+
 function scriptToPlainText(html) {
   const div = document.createElement('div')
   div.innerHTML = (html || '')
@@ -30,6 +36,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     title: review?.title || '',
     author: review?.author || '',
     series_position: review?.series_position || '',
+    genre: review?.genre || '',
     amazon_link: review?.amazon_link || '',
     review_text: review?.review_text || '',
     script: review?.script || '',
@@ -57,6 +64,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         title: review.title || '',
         author: review.author || '',
         series_position: review.series_position || '',
+        genre: review.genre || '',
         amazon_link: review.amazon_link || '',
         review_text: review.review_text || '',
         script: review.script || '',
@@ -262,6 +270,18 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
               padding: 0,
             }}
           />
+          <select
+            value={form.genre}
+            onChange={e => update('genre', e.target.value)}
+            style={{
+              width: '100%', fontSize: 12, border: 'none', outline: 'none',
+              color: form.genre ? 'var(--text-secondary)' : 'var(--text-muted)',
+              fontFamily: 'var(--font)', background: 'transparent', padding: 0, cursor: 'pointer',
+            }}
+          >
+            <option value="">Select a genre…</option>
+            {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
         </div>
       </div>
 

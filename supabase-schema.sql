@@ -520,3 +520,12 @@ alter table public.book_reviews
 
 alter table public.book_reviews
   add column if not exists cover_url text;
+
+
+-- ============================================================
+-- Book review genre
+-- (also available standalone in migration-review-genre.sql)
+-- ============================================================
+
+alter table public.book_reviews
+  add column if not exists genre text;

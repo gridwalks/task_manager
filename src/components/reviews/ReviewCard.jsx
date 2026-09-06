@@ -63,6 +63,16 @@ export default function ReviewCard({ review, isActive, onClick }) {
             </div>
           )}
 
+          {review.genre && (
+            <span style={{
+              display: 'inline-block', fontSize: 9, padding: '1px 6px', borderRadius: 10,
+              background: 'var(--surface-2)', color: 'var(--text-muted)',
+              border: '0.5px solid var(--border)', marginBottom: 4,
+            }}>
+              {review.genre}
+            </span>
+          )}
+
           {preview && (
             <div style={{
               fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4,

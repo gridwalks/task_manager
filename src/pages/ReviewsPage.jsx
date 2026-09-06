@@ -17,7 +17,7 @@ const mobileSelectStyle = {
 }
 
 const EMPTY_REVIEW = {
-  title: '', author: '', series_position: '',
+  title: '', author: '', series_position: '', genre: '',
   amazon_link: '', review_text: '',
   script: '', notes: '', review_date: todayISO(),
   status: 'draft', rating: null, spice_level: null, linked_task_id: null,
