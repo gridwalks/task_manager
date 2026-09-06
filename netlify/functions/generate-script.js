@@ -56,10 +56,18 @@ Return ONLY the script text in that exact format — no title, no explanation, n
     })
 
     const data = await res.json()
+
+    if (!res.ok || data.type === 'error') {
+      return new Response(JSON.stringify({
+        error: `Claude API error (${res.status})`,
+        detail: data.error?.message || JSON.stringify(data),
+      }), { status: 502, headers: { 'Content-Type': 'application/json' } })
+    }
+
     const script = (data.content || []).map(b => b.text || '').join('').trim()
 
     if (!script) {
-      return new Response(JSON.stringify({ error: 'Claude returned an empty script' }), {
+      return new Response(JSON.stringify({ error: 'Claude returned an empty script', detail: JSON.stringify(data) }), {
         status: 502, headers: { 'Content-Type': 'application/json' },
       })
     }
