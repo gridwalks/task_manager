@@ -1,4 +1,5 @@
 import { StarDots } from './StarRating'
+import { SpiceDots } from './SpiceRating'
 import { CoverThumb } from './CoverUpload'
 import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
 import { formatEntryDate, wordCountLabel } from '../../lib/journalUtils'
@@ -33,8 +34,11 @@ export default function ReviewCard({ review, isActive, onClick }) {
             {status.label}
           </span>
         )}
-        {review.rating && (
-          <span style={{ marginLeft: 'auto' }}><StarDots value={review.rating} /></span>
+        {(review.rating || review.spice_level) && (
+          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {review.rating && <StarDots value={review.rating} />}
+            {review.spice_level && <SpiceDots value={review.spice_level} />}
+          </span>
         )}
       </div>
 

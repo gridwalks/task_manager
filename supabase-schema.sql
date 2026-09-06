@@ -502,3 +502,12 @@ create index if not exists library_books_fts
 alter table public.book_reviews
   add column if not exists review_text text default '',
   add column if not exists amazon_link text;
+
+
+-- ============================================================
+-- Book review spice level
+-- (also available standalone in migration-review-spice-level.sql)
+-- ============================================================
+
+alter table public.book_reviews
+  add column if not exists spice_level smallint check (spice_level between 1 and 5);

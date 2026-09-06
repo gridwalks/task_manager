@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Trash2, Link2, X, Copy, Check } from 'lucide-react'
 import StarRating from './StarRating'
+import SpiceRating from './SpiceRating'
 import CoverUpload from './CoverUpload'
 import RichEditor from '../journal/RichEditor'
 import { TaskPickerModal } from '../journal/EntryComposer'
@@ -30,6 +31,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     review_date: review?.review_date || todayISO(),
     status: review?.status || 'draft',
     rating: review?.rating || null,
+    spice_level: review?.spice_level || null,
     linked_task_id: review?.linked_task_id || null,
     cover_path: review?.cover_path || null,
   })
@@ -53,6 +55,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         review_date: review.review_date || todayISO(),
         status: review.status || 'draft',
         rating: review.rating || null,
+        spice_level: review.spice_level || null,
         linked_task_id: review.linked_task_id || null,
         cover_path: review.cover_path || null,
       })
@@ -166,6 +169,11 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         <div style={{ marginLeft: 'auto' }}>
           <StarRating value={form.rating} onChange={v => update('rating', v)} />
         </div>
+      </div>
+
+      {/* Spice level */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <SpiceRating value={form.spice_level} onChange={v => update('spice_level', v)} />
       </div>
 
       {/* Cover + book details */}
