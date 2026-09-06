@@ -511,3 +511,12 @@ alter table public.book_reviews
 
 alter table public.book_reviews
   add column if not exists spice_level smallint check (spice_level between 1 and 5);
+
+
+-- ============================================================
+-- Auto-fetched book cover URL (Google Books lookup for new reviews)
+-- (also available standalone in migration-review-cover-url.sql)
+-- ============================================================
+
+alter table public.book_reviews
+  add column if not exists cover_url text;

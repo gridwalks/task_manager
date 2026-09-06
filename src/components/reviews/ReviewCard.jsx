@@ -43,7 +43,7 @@ export default function ReviewCard({ review, isActive, onClick }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-        <CoverThumb coverPath={review.cover_path} />
+        <CoverThumb coverPath={review.cover_path} coverUrl={review.cover_url} />
         <div style={{ flex: 1, minWidth: 0 }}>
           {review.title && (
             <div style={{

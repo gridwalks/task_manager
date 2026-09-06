@@ -6,23 +6,25 @@ import { useAuth } from '../../hooks/useAuth'
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif'
 const MAX_SIZE = 5 * 1024 * 1024
 
-export default function CoverUpload({ coverPath, onChange, width = 96 }) {
+export default function CoverUpload({ coverPath, coverUrl, onChangePath, onChangeUrl, width = 96 }) {
   const { user } = useAuth()
   const inputRef = useRef()
-  const [url, setUrl] = useState(null)
+  const [signedUrl, setSignedUrl] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState(null)
 
   const height = Math.round(width * 1.5)
+  const hasCover = !!(coverPath || coverUrl)
+  const displayUrl = coverPath ? signedUrl : coverUrl
 
   useEffect(() => {
     let cancelled = false
-    setUrl(null)
+    setSignedUrl(null)
     if (coverPath) {
       getCoverUrl(coverPath)
-        .then(u => { if (!cancelled) setUrl(u) })
-        .catch(() => { if (!cancelled) setUrl(null) })
+        .then(u => { if (!cancelled) setSignedUrl(u) })
+        .catch(() => { if (!cancelled) setSignedUrl(null) })
     }
     return () => { cancelled = true }
   }, [coverPath])
@@ -36,7 +38,7 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
     try {
       const uploaded = await uploadCover(user.id, file)
       if (coverPath) { try { await deleteCover(coverPath) } catch { /* old file may be gone */ } }
-      onChange(uploaded.path)
+      onChangePath(uploaded.path)
     } catch (e) {
       setError('Upload failed: ' + e.message)
     } finally {
@@ -46,8 +48,12 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
 
   const handleRemove = async (e) => {
     e.stopPropagation()
-    if (coverPath) { try { await deleteCover(coverPath) } catch { /* old file may be gone */ } }
-    onChange(null)
+    if (coverPath) {
+      try { await deleteCover(coverPath) } catch { /* old file may be gone */ }
+      onChangePath(null)
+    } else if (coverUrl) {
+      onChangeUrl(null)
+    }
   }
 
   return (
@@ -60,11 +66,11 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
         role="button"
         tabIndex={0}
         onKeyDown={e => e.key === 'Enter' && inputRef.current?.click()}
-        aria-label={coverPath ? 'Replace book cover' : 'Add book cover'}
-        title={coverPath ? 'Click to replace cover' : 'Add a book cover'}
+        aria-label={hasCover ? 'Replace book cover' : 'Add book cover'}
+        title={hasCover ? 'Click to replace cover' : 'Add a book cover'}
         style={{
           position: 'relative', width, height,
-          border: `1.5px ${coverPath ? 'solid var(--border)' : `dashed ${dragOver ? 'var(--accent)' : 'var(--border-mid)'}`}`,
+          border: `1.5px ${hasCover ? 'solid var(--border)' : `dashed ${dragOver ? 'var(--accent)' : 'var(--border-mid)'}`}`,
           borderRadius: 'var(--radius)', overflow: 'hidden', cursor: 'pointer',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: 5, background: dragOver ? '#EEEEFF' : 'var(--surface-2)',
@@ -73,9 +79,9 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
       >
         {uploading ? (
           <Loader size={16} color="var(--accent)" style={{ animation: 'spin 0.7s linear infinite' }} />
-        ) : coverPath && url ? (
-          <img src={url} alt="Book cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : coverPath ? (
+        ) : hasCover && displayUrl ? (
+          <img src={displayUrl} alt="Book cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : hasCover ? (
           <Loader size={14} color="var(--text-muted)" style={{ animation: 'spin 0.7s linear infinite' }} />
         ) : (
           <>
@@ -86,7 +92,7 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
           </>
         )}
 
-        {coverPath && !uploading && (
+        {hasCover && !uploading && (
           <button onClick={handleRemove} aria-label="Remove cover"
             style={{
               position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%',
@@ -95,6 +101,17 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
             }}>
             <X size={10} />
           </button>
+        )}
+
+        {coverUrl && !coverPath && !uploading && (
+          <span style={{
+            position: 'absolute', bottom: 3, left: 3, right: 3,
+            fontSize: 7, letterSpacing: '0.3px', textTransform: 'uppercase',
+            color: '#fff', background: 'rgba(0,0,0,0.55)', borderRadius: 3,
+            padding: '2px 4px', textAlign: 'center',
+          }}>
+            Auto
+          </span>
         )}
       </div>
 
@@ -107,28 +124,29 @@ export default function CoverUpload({ coverPath, onChange, width = 96 }) {
   )
 }
 
-export function CoverThumb({ coverPath, width = 34 }) {
-  const [url, setUrl] = useState(null)
+export function CoverThumb({ coverPath, coverUrl, width = 34 }) {
+  const [signedUrl, setSignedUrl] = useState(null)
   const height = Math.round(width * 1.5)
+  const displayUrl = coverPath ? signedUrl : coverUrl
 
   useEffect(() => {
     let cancelled = false
-    setUrl(null)
+    setSignedUrl(null)
     if (coverPath) {
       getCoverUrl(coverPath)
-        .then(u => { if (!cancelled) setUrl(u) })
-        .catch(() => { if (!cancelled) setUrl(null) })
+        .then(u => { if (!cancelled) setSignedUrl(u) })
+        .catch(() => { if (!cancelled) setSignedUrl(null) })
     }
     return () => { cancelled = true }
   }, [coverPath])
 
-  if (!coverPath) return null
+  if (!coverPath && !coverUrl) return null
   return (
     <div style={{
       width, height, flexShrink: 0, borderRadius: 3, overflow: 'hidden',
       border: '0.5px solid var(--border)', background: 'var(--surface-2)',
     }}>
-      {url && <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+      {displayUrl && <img src={displayUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
     </div>
   )
 }

@@ -9,7 +9,10 @@ import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
 import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journalUtils'
 import { scriptTextToHtml } from '../../lib/reviewImport'
 import { generateTikTokScript } from '../../lib/ai'
+import { findBookCoverUrl } from '../../lib/bookCovers'
 import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
+
+const COVER_LOOKUP_DELAY = 1000
 
 const AUTOSAVE_DELAY = 1500
 
@@ -37,6 +40,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     spice_level: review?.spice_level || null,
     linked_task_id: review?.linked_task_id || null,
     cover_path: review?.cover_path || null,
+    cover_url: review?.cover_url || null,
   })
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState(null)
@@ -63,6 +67,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         spice_level: review.spice_level || null,
         linked_task_id: review.linked_task_id || null,
         cover_path: review.cover_path || null,
+        cover_url: review.cover_url || null,
       })
       setSavedAt(null)
     }
@@ -90,6 +95,19 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
 
   useEffect(() => () => clearTimeout(autosaveTimer.current), [])
   useFlushSaveOnHide(form, save, autosaveTimer)
+
+  // Auto-fetch a cover for a brand-new review once a title is entered
+  // (from typing, or prefilled via "Start a review" from the Library) —
+  // a manual upload always takes precedence and is never overwritten.
+  useEffect(() => {
+    if (!isNew || form.cover_path || form.cover_url || !form.title?.trim()) return
+    const timer = setTimeout(async () => {
+      const url = await findBookCoverUrl(form.title, form.author)
+      if (!url) return
+      setForm(prev => (prev.cover_path || prev.cover_url) ? prev : { ...prev, cover_url: url })
+    }, COVER_LOOKUP_DELAY)
+    return () => clearTimeout(timer)
+  }, [isNew, form.title, form.author, form.cover_path, form.cover_url])
 
   const update = (field, value) => {
     const next = { ...form, [field]: value }
@@ -209,7 +227,9 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
       <div style={{ display: 'flex', gap: 14, marginBottom: 12, alignItems: 'flex-start' }}>
         <CoverUpload
           coverPath={form.cover_path}
-          onChange={p => update('cover_path', p)}
+          coverUrl={form.cover_url}
+          onChangePath={p => update('cover_path', p)}
+          onChangeUrl={u => update('cover_url', u)}
         />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 4 }}>
           <input
