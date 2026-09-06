@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Trash2, Link2, X, Copy, Check, Sparkles, Loader } from 'lucide-react'
+import { Trash2, Link2, X, Copy, Check, Sparkles, Loader, Settings } from 'lucide-react'
 import StarRating from './StarRating'
 import SpiceRating from './SpiceRating'
 import CoverUpload from './CoverUpload'
+import GenreSettings from './GenreSettings'
 import RichEditor from '../journal/RichEditor'
 import { TaskPickerModal } from '../journal/EntryComposer'
 import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
+import { useReviewGenres } from '../../hooks/useReviewGenres'
 import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journalUtils'
 import { scriptTextToHtml } from '../../lib/reviewImport'
 import { generateTikTokScript } from '../../lib/ai'
@@ -15,12 +17,6 @@ import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
 const COVER_LOOKUP_DELAY = 1000
 
 const AUTOSAVE_DELAY = 1500
-
-const GENRES = [
-  'Romance', 'Dark Romance', 'Romantasy', 'Fantasy', 'Science Fiction',
-  'Young Adult', 'Mystery / Thriller', 'Horror', 'Contemporary Fiction',
-  'Historical Fiction', 'Nonfiction', 'Memoir / Biography', 'Self-Help', 'Other',
-]
 
 function scriptToPlainText(html) {
   const div = document.createElement('div')
@@ -32,6 +28,8 @@ function scriptToPlainText(html) {
 
 export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   const isNew = !review?.id
+  const { reviewGenres, saveReviewGenres } = useReviewGenres()
+  const [showGenreSettings, setShowGenreSettings] = useState(false)
   const [form, setForm] = useState({
     title: review?.title || '',
     author: review?.author || '',
@@ -286,9 +284,22 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
 
       {/* Genres */}
       <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>Genres</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Genres</div>
+          <button
+            onClick={() => setShowGenreSettings(true)}
+            title="Manage genres"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3, marginLeft: 'auto',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font)',
+            }}
+          >
+            <Settings size={10} /> Manage
+          </button>
+        </div>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {GENRES.map(g => {
+          {reviewGenres.map(g => {
             const active = form.genres.includes(g)
             return (
               <button
@@ -467,6 +478,15 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
           tasks={tasks}
           onSelect={id => { update('linked_task_id', id); setShowTaskPicker(false) }}
           onClose={() => setShowTaskPicker(false)}
+        />
+      )}
+
+      {/* Genre settings */}
+      {showGenreSettings && (
+        <GenreSettings
+          genres={reviewGenres}
+          onSave={saveReviewGenres}
+          onClose={() => setShowGenreSettings(false)}
         />
       )}
     </div>
