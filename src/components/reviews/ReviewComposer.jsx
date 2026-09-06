@@ -226,7 +226,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
 
       {/* Book review */}
       <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>Book review</div>
-      <div style={{ flex: 1, minHeight: 140, marginBottom: 14, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 220, marginBottom: 14, display: 'flex', flexDirection: 'column' }}>
         <RichEditor
           value={form.review_text}
           onChange={v => update('review_text', v)}
@@ -252,7 +252,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
           </button>
         )}
       </div>
-      <div style={{ flex: 1, minHeight: 140, marginBottom: 12, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 220, marginBottom: 12, display: 'flex', flexDirection: 'column' }}>
         <RichEditor
           value={form.script}
           onChange={v => update('script', v)}
@@ -310,7 +310,11 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
       </div>
 
       {/* Footer */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 10, borderTop: '0.5px solid var(--border)' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0 4px',
+        borderTop: '0.5px solid var(--border)', position: 'sticky', bottom: 0,
+        background: 'var(--surface)', zIndex: 2,
+      }}>
         {form.script && (
           <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{wordCountLabel(form.script)}</span>
         )}
