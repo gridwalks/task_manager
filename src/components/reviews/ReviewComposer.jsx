@@ -16,6 +16,7 @@ import { amazonSearchUrl } from '../../lib/amazonAffiliate'
 import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
 
 const COVER_LOOKUP_DELAY = 1000
+const AMAZON_AUTOFILL_ENABLED = false
 
 const AUTOSAVE_DELAY = 1500
 
@@ -129,7 +130,12 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   // the actual book (or anything else) still earns commission, even
   // though that next page's URL won't visibly show the tag anymore.
   // Never overwrites a link you've entered.
+  //
+  // DISABLED per request (2026-09-06) — wasn't working correctly, revisit
+  // later. Flip AMAZON_AUTOFILL_ENABLED back to true to re-enable; no
+  // other changes needed.
   useEffect(() => {
+    if (!AMAZON_AUTOFILL_ENABLED) return
     if (form.amazon_link || !form.title?.trim()) return
     const timer = setTimeout(() => {
       const url = amazonSearchUrl(form.title, form.author)
