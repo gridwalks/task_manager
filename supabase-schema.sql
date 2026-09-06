@@ -529,3 +529,25 @@ alter table public.book_reviews
 
 alter table public.book_reviews
   add column if not exists genre text;
+
+
+-- ============================================================
+-- Multiple genres per book review (replaces the single genre column)
+-- (also available standalone in migration-review-genres-multi.sql)
+-- ============================================================
+
+alter table public.book_reviews
+  add column if not exists genres text[] default '{}';
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'book_reviews' and column_name = 'genre'
+  ) then
+    update public.book_reviews
+      set genres = array[genre]
+      where genre is not null and (genres is null or genres = '{}');
+    alter table public.book_reviews drop column genre;
+  end if;
+end $$;

@@ -36,7 +36,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     title: review?.title || '',
     author: review?.author || '',
     series_position: review?.series_position || '',
-    genre: review?.genre || '',
+    genres: review?.genres || [],
     amazon_link: review?.amazon_link || '',
     review_text: review?.review_text || '',
     script: review?.script || '',
@@ -64,7 +64,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         title: review.title || '',
         author: review.author || '',
         series_position: review.series_position || '',
-        genre: review.genre || '',
+        genres: review.genres || [],
         amazon_link: review.amazon_link || '',
         review_text: review.review_text || '',
         script: review.script || '',
@@ -121,6 +121,11 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     const next = { ...form, [field]: value }
     setForm(next)
     scheduleAutosave(next)
+  }
+
+  const toggleGenre = (g) => {
+    const next = form.genres.includes(g) ? form.genres.filter(x => x !== g) : [...form.genres, g]
+    update('genres', next)
   }
 
   const handleSave = () => {
@@ -270,18 +275,33 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
               padding: 0,
             }}
           />
-          <select
-            value={form.genre}
-            onChange={e => update('genre', e.target.value)}
-            style={{
-              width: '100%', fontSize: 12, border: 'none', outline: 'none',
-              color: form.genre ? 'var(--text-secondary)' : 'var(--text-muted)',
-              fontFamily: 'var(--font)', background: 'transparent', padding: 0, cursor: 'pointer',
-            }}
-          >
-            <option value="">Select a genre…</option>
-            {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-          </select>
+        </div>
+      </div>
+
+      {/* Genres */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>Genres</div>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {GENRES.map(g => {
+            const active = form.genres.includes(g)
+            return (
+              <button
+                key={g}
+                onClick={() => toggleGenre(g)}
+                aria-pressed={active}
+                style={{
+                  fontSize: 10, padding: '2px 8px', borderRadius: 10, cursor: 'pointer',
+                  fontFamily: 'var(--font)', border: `0.5px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                  background: active ? '#EEEEFF' : 'transparent',
+                  color: active ? 'var(--accent)' : 'var(--text-muted)',
+                  fontWeight: active ? 500 : 400,
+                  transition: 'all 0.1s',
+                }}
+              >
+                {g}
+              </button>
+            )
+          })}
         </div>
       </div>
 
