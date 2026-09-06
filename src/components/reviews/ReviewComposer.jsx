@@ -104,18 +104,24 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   useEffect(() => () => clearTimeout(autosaveTimer.current), [])
   useFlushSaveOnHide(form, save, autosaveTimer)
 
-  // Auto-fetch a cover for a brand-new review once a title is entered
-  // (from typing, or prefilled via "Start a review" from the Library) —
-  // a manual upload always takes precedence and is never overwritten.
+  // Auto-fetch a cover whenever one is missing and a title is present —
+  // for a brand-new review (typed, or prefilled via "Start a review" from
+  // the Library) and for any existing review you open that never got one.
+  // A manual upload always takes precedence and is never overwritten.
   useEffect(() => {
-    if (!isNew || form.cover_path || form.cover_url || !form.title?.trim()) return
+    if (form.cover_path || form.cover_url || !form.title?.trim()) return
     const timer = setTimeout(async () => {
       const url = await findBookCoverUrl(form.title, form.author)
       if (!url) return
-      setForm(prev => (prev.cover_path || prev.cover_url) ? prev : { ...prev, cover_url: url })
+      setForm(prev => {
+        if (prev.cover_path || prev.cover_url) return prev
+        const next = { ...prev, cover_url: url }
+        scheduleAutosave(next)
+        return next
+      })
     }, COVER_LOOKUP_DELAY)
     return () => clearTimeout(timer)
-  }, [isNew, form.title, form.author, form.cover_path, form.cover_url])
+  }, [form.title, form.author, form.cover_path, form.cover_url, scheduleAutosave])
 
   const update = (field, value) => {
     const next = { ...form, [field]: value }
