@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Trash2, Link2, X, Copy, Check } from 'lucide-react'
+import { Trash2, Link2, X, Copy, Check, Sparkles, Loader } from 'lucide-react'
 import StarRating from './StarRating'
 import SpiceRating from './SpiceRating'
 import CoverUpload from './CoverUpload'
@@ -7,6 +7,8 @@ import RichEditor from '../journal/RichEditor'
 import { TaskPickerModal } from '../journal/EntryComposer'
 import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
 import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journalUtils'
+import { scriptTextToHtml } from '../../lib/reviewImport'
+import { generateTikTokScript } from '../../lib/ai'
 
 const AUTOSAVE_DELAY = 1500
 
@@ -40,6 +42,8 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   const [saveError, setSaveError] = useState(null)
   const [copied, setCopied] = useState(false)
   const [showTaskPicker, setShowTaskPicker] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [generateError, setGenerateError] = useState(null)
   const autosaveTimer = useRef(null)
 
   useEffect(() => {
@@ -112,7 +116,30 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     } catch { /* clipboard unavailable */ }
   }
 
+  const handleGenerateScript = async () => {
+    const reviewPlain = scriptToPlainText(form.review_text)
+    if (!reviewPlain) return
+    if (scriptToPlainText(form.script) && !window.confirm('Replace the current TikTok script with a new AI-generated one?')) return
+
+    setGenerating(true)
+    setGenerateError(null)
+    try {
+      const script = await generateTikTokScript({
+        title: form.title,
+        author: form.author,
+        seriesPosition: form.series_position,
+        reviewText: reviewPlain,
+      })
+      update('script', scriptTextToHtml(script))
+    } catch (e) {
+      setGenerateError(e.message || 'Script generation failed')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   const linkedTask = form.linked_task_id ? tasks.find(t => t.id === form.linked_task_id) : null
+  const hasReviewText = !!scriptToPlainText(form.review_text)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 16, gap: 0 }}>
@@ -245,21 +272,40 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
       {/* Script */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
         <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TikTok script</div>
-        {form.script && (
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           <button
-            onClick={handleCopyScript}
-            title="Copy script as plain text"
+            onClick={handleGenerateScript}
+            disabled={generating || !hasReviewText}
+            title={hasReviewText ? 'Generate a script from the book review with Claude' : 'Write a book review first'}
             style={{
-              display: 'flex', alignItems: 'center', gap: 3, marginLeft: 'auto',
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontSize: 10, color: copied ? 'var(--accent)' : 'var(--text-muted)', fontFamily: 'var(--font)',
+              display: 'flex', alignItems: 'center', gap: 3,
+              background: 'none', border: 'none', cursor: (generating || !hasReviewText) ? 'default' : 'pointer',
+              fontSize: 10, color: generating ? 'var(--text-muted)' : 'var(--accent)', fontFamily: 'var(--font)',
+              opacity: hasReviewText ? 1 : 0.5,
             }}
           >
-            {copied ? <Check size={10} /> : <Copy size={10} />}
-            {copied ? 'Copied' : 'Copy'}
+            {generating ? <Loader size={10} style={{ animation: 'spin 0.7s linear infinite' }} /> : <Sparkles size={10} />}
+            {generating ? 'Generating…' : 'Generate with AI'}
           </button>
-        )}
+          {form.script && (
+            <button
+              onClick={handleCopyScript}
+              title="Copy script as plain text"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 3,
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 10, color: copied ? 'var(--accent)' : 'var(--text-muted)', fontFamily: 'var(--font)',
+              }}
+            >
+              {copied ? <Check size={10} /> : <Copy size={10} />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          )}
+        </div>
       </div>
+      {generateError && (
+        <div style={{ fontSize: 10, color: '#A32D2D', marginBottom: 5 }}>{generateError}</div>
+      )}
       <div style={{ height: 220, marginBottom: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <RichEditor
           value={form.script}

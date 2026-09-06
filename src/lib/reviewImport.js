@@ -6,7 +6,7 @@ function escapeHtml(s) {
 // "[HOOK ...]\ndialogue line") into the same rich-text HTML the
 // Tiptap editor produces, so imported scripts render identically
 // to hand-written ones.
-function scriptTextToHtml(text) {
+export function scriptTextToHtml(text) {
   if (!text) return ''
   const blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean)
   return blocks.map(b => `<p>${escapeHtml(b).replace(/\n/g, '<br>')}</p>`).join('')
