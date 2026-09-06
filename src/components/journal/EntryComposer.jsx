@@ -6,6 +6,7 @@ import JournalTagSettings from './JournalTagSettings'
 import RichEditor from './RichEditor'
 import { ENTRY_TYPES } from '../../hooks/useJournalConfig'
 import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journalUtils'
+import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
 
 const AUTOSAVE_DELAY = 1500
 
@@ -61,6 +62,7 @@ export default function EntryComposer({ entry, journalTags, tasks, onSave, onDel
   }, [isNew, save])
 
   useEffect(() => () => clearTimeout(autosaveTimer.current), [])
+  useFlushSaveOnHide(form, save, autosaveTimer)
 
   const update = (field, value) => {
     const next = { ...form, [field]: value }

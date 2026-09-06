@@ -9,6 +9,7 @@ import { REVIEW_STATUSES } from '../../hooks/useBookReviews'
 import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journalUtils'
 import { scriptTextToHtml } from '../../lib/reviewImport'
 import { generateTikTokScript } from '../../lib/ai'
+import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
 
 const AUTOSAVE_DELAY = 1500
 
@@ -88,6 +89,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   }, [isNew, save])
 
   useEffect(() => () => clearTimeout(autosaveTimer.current), [])
+  useFlushSaveOnHide(form, save, autosaveTimer)
 
   const update = (field, value) => {
     const next = { ...form, [field]: value }
