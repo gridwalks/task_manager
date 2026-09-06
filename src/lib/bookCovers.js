@@ -29,25 +29,41 @@ async function findBetterCoverId(workKey, fallbackId) {
   }
 }
 
+async function searchWork(title, author) {
+  const params = new URLSearchParams({ title, limit: '1', fields: 'key,cover_i' })
+  if (author?.trim()) params.set('author', author.trim())
+
+  const res = await fetch(`https://openlibrary.org/search.json?${params}`)
+  if (!res.ok) return null
+  const data = await res.json()
+  return data.docs?.[0] || null
+}
+
+// Strips a trailing ": Subtitle" — Open Library's title search is exact
+// enough that "Dark Matter: A Novel" returns zero results even though
+// "Dark Matter" alone finds it immediately.
+function stripColonSubtitle(title) {
+  const i = title.indexOf(':')
+  return i === -1 ? title : title.slice(0, i).trim()
+}
+
 export async function findBookCoverUrl(title, author) {
   const t = title?.trim()
   if (!t) return null
 
-  const params = new URLSearchParams({ title: t, limit: '1', fields: 'key,cover_i' })
-  if (author?.trim()) params.set('author', author.trim())
-
-  let coverId
+  let doc
   try {
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`)
-    if (!res.ok) return null
-    const data = await res.json()
-    const doc = data.docs?.[0]
+    doc = await searchWork(t, author)
+    if (!doc) {
+      const short = stripColonSubtitle(t)
+      if (short && short !== t) doc = await searchWork(short, author)
+    }
     if (!doc) return null
-    coverId = doc.key ? await findBetterCoverId(doc.key, doc.cover_i) : doc.cover_i
   } catch {
     return null
   }
 
+  const coverId = doc.key ? await findBetterCoverId(doc.key, doc.cover_i) : doc.cover_i
   if (!coverId) return null
   return `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
 }
