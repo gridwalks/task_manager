@@ -11,6 +11,7 @@ import { todayISO, groupByMonth, formatMonthKey } from '../lib/journalUtils'
 
 const EMPTY_REVIEW = {
   title: '', author: '', series_position: '',
+  amazon_link: '', review_text: '',
   script: '', notes: '', review_date: todayISO(),
   status: 'draft', rating: null, linked_task_id: null,
   cover_path: null,

@@ -492,3 +492,13 @@ create index if not exists library_books_fts
   using gin(to_tsvector('english',
     coalesce(title,'') || ' ' || coalesce(series,'') || ' ' || coalesce(first_author,'')));
 
+
+
+-- ============================================================
+-- Book review text + Amazon affiliate link
+-- (also available standalone in migration-review-text-and-link.sql)
+-- ============================================================
+
+alter table public.book_reviews
+  add column if not exists review_text text default '',
+  add column if not exists amazon_link text;

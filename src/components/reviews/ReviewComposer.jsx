@@ -23,6 +23,8 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     title: review?.title || '',
     author: review?.author || '',
     series_position: review?.series_position || '',
+    amazon_link: review?.amazon_link || '',
+    review_text: review?.review_text || '',
     script: review?.script || '',
     notes: review?.notes || '',
     review_date: review?.review_date || todayISO(),
@@ -44,6 +46,8 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         title: review.title || '',
         author: review.author || '',
         series_position: review.series_position || '',
+        amazon_link: review.amazon_link || '',
+        review_text: review.review_text || '',
         script: review.script || '',
         notes: review.notes || '',
         review_date: review.review_date || todayISO(),
@@ -57,7 +61,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
   }, [review?.id])
 
   const save = useCallback(async (data) => {
-    if (!data.title?.trim() && !scriptToPlainText(data.script)) return
+    if (!data.title?.trim() && !scriptToPlainText(data.script) && !scriptToPlainText(data.review_text)) return
     setSaving(true)
     try {
       await onSave(data)
@@ -204,6 +208,32 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
         </div>
       </div>
 
+      {/* Amazon affiliate link */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>Amazon affiliate link</div>
+        <input
+          type="url"
+          value={form.amazon_link}
+          onChange={e => update('amazon_link', e.target.value)}
+          placeholder="https://www.amazon.com/dp/…?tag=your-affiliate-id"
+          style={{
+            width: '100%', fontSize: 12, border: '0.5px solid var(--border)', borderRadius: 'var(--radius)',
+            outline: 'none', padding: '6px 9px', fontFamily: 'var(--font)',
+            color: 'var(--text-primary)', background: 'var(--surface-2)',
+          }}
+        />
+      </div>
+
+      {/* Book review */}
+      <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>Book review</div>
+      <div style={{ flex: 1, minHeight: 140, marginBottom: 14, display: 'flex', flexDirection: 'column' }}>
+        <RichEditor
+          value={form.review_text}
+          onChange={v => update('review_text', v)}
+          placeholder="Write the full review here…"
+        />
+      </div>
+
       {/* Script */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
         <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TikTok script</div>
@@ -222,7 +252,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
           </button>
         )}
       </div>
-      <div style={{ flex: 1, minHeight: 0, marginBottom: 12, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 140, marginBottom: 12, display: 'flex', flexDirection: 'column' }}>
         <RichEditor
           value={form.script}
           onChange={v => update('script', v)}
