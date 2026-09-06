@@ -12,8 +12,7 @@ import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journal
 import { scriptTextToHtml } from '../../lib/reviewImport'
 import { generateTikTokScript } from '../../lib/ai'
 import { findBookCoverUrl } from '../../lib/bookCovers'
-import { findLibraryLink } from '../../lib/libraryLookup'
-import { withAffiliateTag, amazonSearchUrl } from '../../lib/amazonAffiliate'
+import { amazonSearchUrl } from '../../lib/amazonAffiliate'
 import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
 
 const COVER_LOOKUP_DELAY = 1000
@@ -123,20 +122,17 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     return () => clearTimeout(timer)
   }, [form.title, form.author, form.cover_path, form.cover_url, scheduleAutosave])
 
-  // Auto-fill the Amazon link the same way — prefer the exact product
-  // link already captured for this book in the Library, falling back to
-  // a tagged Amazon search link when the book isn't in your Library data
-  // yet. The tag still
-  // sets Amazon's affiliate tracking cookie the moment the search page
-  // loads, valid for 24 hours — clicking through to buy the actual book
-  // (or anything else) still earns commission, even though that next
-  // page's URL won't visibly show the tag anymore. Never overwrites a
-  // link you've entered.
+  // Auto-fill the Amazon link the same way — a tagged Amazon search link
+  // built straight from the review's own title/author, no other table
+  // involved. The tag sets Amazon's affiliate tracking cookie the moment
+  // the search page loads, valid for 24 hours — clicking through to buy
+  // the actual book (or anything else) still earns commission, even
+  // though that next page's URL won't visibly show the tag anymore.
+  // Never overwrites a link you've entered.
   useEffect(() => {
     if (form.amazon_link || !form.title?.trim()) return
-    const timer = setTimeout(async () => {
-      const libraryLink = await findLibraryLink(form.title)
-      const url = libraryLink ? withAffiliateTag(libraryLink) : amazonSearchUrl(form.title, form.author)
+    const timer = setTimeout(() => {
+      const url = amazonSearchUrl(form.title, form.author)
       setForm(prev => {
         if (prev.amazon_link) return prev
         const next = { ...prev, amazon_link: url }
