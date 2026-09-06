@@ -12,6 +12,8 @@ import { formatEntryDateLong, todayISO, wordCountLabel } from '../../lib/journal
 import { scriptTextToHtml } from '../../lib/reviewImport'
 import { generateTikTokScript } from '../../lib/ai'
 import { findBookCoverUrl } from '../../lib/bookCovers'
+import { findLibraryLink } from '../../lib/libraryLookup'
+import { withAffiliateTag, amazonSearchUrl } from '../../lib/amazonAffiliate'
 import { useFlushSaveOnHide } from '../../hooks/useFlushSaveOnHide'
 
 const COVER_LOOKUP_DELAY = 1000
@@ -120,6 +122,24 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
     }, COVER_LOOKUP_DELAY)
     return () => clearTimeout(timer)
   }, [form.title, form.author, form.cover_path, form.cover_url, scheduleAutosave])
+
+  // Auto-fill the Amazon link the same way — prefer the exact link already
+  // captured for this book in the imported Library, falling back to a
+  // tagged Amazon search link. Never overwrites a link you've entered.
+  useEffect(() => {
+    if (form.amazon_link || !form.title?.trim()) return
+    const timer = setTimeout(async () => {
+      const libraryLink = await findLibraryLink(form.title)
+      const url = libraryLink ? withAffiliateTag(libraryLink) : amazonSearchUrl(form.title, form.author)
+      setForm(prev => {
+        if (prev.amazon_link) return prev
+        const next = { ...prev, amazon_link: url }
+        scheduleAutosave(next)
+        return next
+      })
+    }, COVER_LOOKUP_DELAY)
+    return () => clearTimeout(timer)
+  }, [form.title, form.author, form.amazon_link, scheduleAutosave])
 
   const update = (field, value) => {
     const next = { ...form, [field]: value }
