@@ -226,7 +226,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
 
       {/* Book review */}
       <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 5 }}>Book review</div>
-      <div style={{ height: 220, marginBottom: 14, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 220, marginBottom: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <RichEditor
           value={form.review_text}
           onChange={v => update('review_text', v)}
@@ -252,7 +252,7 @@ export default function ReviewComposer({ review, tasks, onSave, onDelete }) {
           </button>
         )}
       </div>
-      <div style={{ height: 220, marginBottom: 12, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 220, marginBottom: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <RichEditor
           value={form.script}
           onChange={v => update('script', v)}

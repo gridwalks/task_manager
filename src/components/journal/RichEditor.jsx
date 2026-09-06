@@ -156,10 +156,10 @@ export default function RichEditor({ value, onChange, placeholder = 'Write your 
       borderRadius: 'var(--radius)',
       background: 'var(--surface)',
       display: 'flex', flexDirection: 'column',
-      flex: 1,
+      flex: 1, minHeight: 0,
     }}>
       <Toolbar editor={editor} />
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
         <EditorContent editor={editor} style={{ height: '100%' }} />
       </div>
       <style>{`
