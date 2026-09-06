@@ -155,3 +155,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--text-primar
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+
+/* ── Mobile: collapse sidebar to icon rail so content gets real width ── */
+@media (max-width: 768px) {
+  .sidebar { width: 52px; }
+  .sidebar-brand { display: none; }
+  .sidebar-link { justify-content: center; padding: 9px 0; gap: 0; }
+  .sidebar-link span { display: none; }
+  .sidebar-badge { display: none; }
+  .sidebar-avatar { margin: 6px auto 4px; }
+}

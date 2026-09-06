@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Plus, Search, Star } from 'lucide-react'
+import { Plus, Search, Star, ChevronLeft } from 'lucide-react'
 import { useBookReviews, REVIEW_STATUSES } from '../hooks/useBookReviews'
 import { useTasks } from '../hooks/useTasks'
+import { useIsMobile } from '../hooks/useIsMobile'
 import ReviewCard from '../components/reviews/ReviewCard'
 import ReviewComposer from '../components/reviews/ReviewComposer'
 import ReviewImport from '../components/reviews/ReviewImport'
 import { deleteCover } from '../lib/storage'
 import { todayISO, groupByMonth, formatMonthKey } from '../lib/journalUtils'
+
+const mobileSelectStyle = {
+  flex: 1, fontSize: 12, padding: '6px 8px', border: '0.5px solid var(--border-mid)',
+  borderRadius: 'var(--radius)', background: 'var(--surface-2)', color: 'var(--text-secondary)',
+  fontFamily: 'var(--font)',
+}
 
 const EMPTY_REVIEW = {
   title: '', author: '', series_position: '',
@@ -35,6 +42,7 @@ export default function ReviewsPage() {
   const { tasks } = useTasks()
   const location = useLocation()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   const [activeId, setActiveIdState] = useState(readStoredActiveId)
   const setActiveId = (id) => { setActiveIdState(id); writeStoredActiveId(id) }
@@ -106,6 +114,112 @@ export default function ReviewsPage() {
     for (let n = 1; n <= 5; n++) counts[n] = reviews.filter(r => r.rating === n).length
     return counts
   }, [reviews])
+
+  if (isMobile && (isNew || activeReview)) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, background: 'var(--surface)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '0.5px solid var(--border)', flexShrink: 0 }}>
+          <button
+            onClick={() => { setActiveId(null); setIsNew(false) }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none',
+              cursor: 'pointer', fontSize: 13, color: 'var(--accent)', fontFamily: 'var(--font)', padding: 0,
+            }}
+          >
+            <ChevronLeft size={17} /> Reviews
+          </button>
+        </div>
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+          <ReviewComposer
+            key={isNew ? 'new' : activeId}
+            review={isNew ? newDefaults : activeReview}
+            tasks={tasks}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (isMobile) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, background: 'var(--bg)' }}>
+        <div style={{ padding: '10px 12px', borderBottom: '0.5px solid var(--border)', background: 'var(--surface)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)' }}>Book Reviews</span>
+            <button onClick={handleNew} style={{
+              marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4,
+              padding: '5px 12px', background: 'var(--accent)', color: '#fff',
+              border: 'none', borderRadius: 'var(--radius)', fontSize: 12,
+              cursor: 'pointer', fontFamily: 'var(--font)',
+            }}>
+              <Plus size={13} /> New
+            </button>
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 1, padding: '6px 10px',
+            border: '0.5px solid var(--border-mid)', borderRadius: 'var(--radius)',
+            background: 'var(--surface-2)', marginBottom: 8,
+          }}>
+            <Search size={13} color="var(--text-muted)" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search title, author, script…"
+              style={{
+                flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                fontSize: 13, fontFamily: 'var(--font)', color: 'var(--text-primary)', marginLeft: 6,
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={mobileSelectStyle}>
+              <option value="all">All statuses</option>
+              {REVIEW_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+            </select>
+            <select
+              value={ratingFilter}
+              onChange={e => setRatingFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+              style={mobileSelectStyle}
+            >
+              <option value="all">All ratings</option>
+              {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} star{n !== 1 ? 's' : ''}</option>)}
+            </select>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <ReviewImport onImport={importReviews} />
+          </div>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: 10 }}>
+          {loading && <div style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Loading…</div>}
+          {!loading && filtered.length === 0 && (
+            <div style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              {search || statusFilter !== 'all' || ratingFilter !== 'all'
+                ? 'No reviews match your filters.'
+                : 'No reviews yet. Tap New to add your first book review.'}
+            </div>
+          )}
+          {grouped.map(([monthKey, monthReviews]) => (
+            <div key={monthKey}>
+              <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '8px 2px 6px' }}>
+                {formatMonthKey(monthKey)}
+              </div>
+              {monthReviews.map(review => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  isActive={false}
+                  onClick={() => handleSelect(review)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', flex: 1, minHeight: 0, background: 'var(--bg)', overflow: 'hidden' }}>
